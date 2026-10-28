@@ -1,21 +1,30 @@
-const vehicles = new Map();
 
-function updateVehicle(vehicleId , telemetry){
-    const reading ={
-        vehicleId,
-        ...telemetry,
-        timestamp: new Date().toISOString(),
+const Vehicle = require("../models/vehicle");
+
+async function updateVehicle(vehicleId, telemetry) {
+  const vehicle = await Vehicle.findOneAndUpdate(
+    { vehicleId },
+    {
+      ...telemetry,
+      vehicleId,
+      timestamp: new Date(),
+    },
+    {
+      new: true,
+      upsert: true,
+      runValidators: true,
     }
-    vehicles.set(vehicleId,reading);
-    return reading;
+  );
+
+  return vehicle;
 }
 
-function getAllVehicles(){
-    return Array.from(vehicles.values());
+async function getAllVehicles() {
+  return await Vehicle.find();
 }
 
-function getVehicleById(vehicleId) {
-  return vehicles.get(vehicleId);
+async function getVehicleById(vehicleId) {
+  return await Vehicle.findOne({ vehicleId });
 }
 
 module.exports = {

@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const vehicleRoutes = require("./routes/vehicleRoutes");
+const connectDB = require('./config/db');
 
 const app = express();
 
@@ -21,6 +22,13 @@ app.use('/api/vehicles',vehicleRoutes)
 
 const PORT = process.env.PORT || 5000;
 
+async function startServer(){
+  await connectDB();
+}
+
 app.listen(PORT,()=>{
     console.log(`PulseOps running on port ${PORT}`)
 })
+
+startServer();
+
