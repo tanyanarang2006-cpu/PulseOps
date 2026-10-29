@@ -1,5 +1,6 @@
 
 const vehicleService = require("../services/vehicleService");
+const { getIO } = require("../config/socket");
 
 async function receiveTelemetry(req, res) {
   try {
@@ -35,6 +36,8 @@ async function receiveTelemetry(req, res) {
     });
 
     console.log("Telemetry received:", reading);
+    const io = getIO();
+    io.emit("vehicle:update", reading.toObject());
 
     return res.status(201).json({
       success: true,
@@ -50,6 +53,7 @@ async function receiveTelemetry(req, res) {
     });
   }
 }
+
 
 async function getAllVehicles(req, res) {
   try {
