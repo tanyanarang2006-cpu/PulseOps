@@ -1,6 +1,7 @@
 
 const vehicleService = require("../services/vehicleService");
 const { getIO } = require("../config/socket");
+const {calculateDistance,DELIVERY_ZONE} = require('../services/geofenceService');
 
 async function receiveTelemetry(req, res) {
   try {
@@ -34,6 +35,33 @@ async function receiveTelemetry(req, res) {
       temperature,
       speed,
     });
+    //health alerts
+    const alerts = [];
+
+    if (reading.battery <= 20) {
+      alerts.push("LOW_BATTERY");
+    }
+
+    if (reading.temperature >= 80) {
+      alerts.push("HIGH_TEMPERATURE");
+    }
+
+    if (alerts.length > 0) {
+      console.log("Alerts detected:", vehicleId, alerts);
+    }
+    //Geofance check
+    const distance = calculateDistance(
+    reading.latitude,
+    reading.longitude,
+    DELIVERY_ZONE.latitude,
+    DELIVERY_ZONE.longitude
+    );
+
+  if (distance <= DELIVERY_ZONE.radiusKm) {
+    console.log(`${vehicleId} is inside the delivery zone`);
+  } else {
+    console.log(`${vehicleId} is outside the delivery zone`);
+  }
 
     console.log("Telemetry received:", reading);
     const io = getIO();
@@ -53,6 +81,7 @@ async function receiveTelemetry(req, res) {
     });
   }
 }
+
 
 
 async function getAllVehicles(req, res) {
