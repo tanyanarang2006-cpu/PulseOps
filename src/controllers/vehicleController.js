@@ -1,7 +1,13 @@
 
 const vehicleService = require("../services/vehicleService");
 const { getIO } = require("../config/socket");
-const {calculateDistance,DELIVERY_ZONE} = require('../services/geofenceService');
+const { detectVehicleAlerts } = require("../services/alertService");
+const {
+  detectGeofenceTransition,
+} = require("../services/geofenceService");
+const {
+  processVehicleAlerts,
+} = require("../services/eventDetectionService");
 
 async function receiveTelemetry(req, res) {
   try {
@@ -35,33 +41,27 @@ async function receiveTelemetry(req, res) {
       temperature,
       speed,
     });
-    //health alerts
-    const alerts = [];
-
-    if (reading.battery <= 20) {
-      alerts.push("LOW_BATTERY");
-    }
-
-    if (reading.temperature >= 80) {
-      alerts.push("HIGH_TEMPERATURE");
-    }
+    const alerts = detectVehicleAlerts(reading);
 
     if (alerts.length > 0) {
       console.log("Alerts detected:", vehicleId, alerts);
     }
-    //Geofance check
-    const distance = calculateDistance(
-    reading.latitude,
-    reading.longitude,
-    DELIVERY_ZONE.latitude,
-    DELIVERY_ZONE.longitude
+
+    await processVehicleAlerts(reading, alerts);
+
+await processVehicleAlerts(reading, alerts);
+    //Geofence check
+    const geofence = detectGeofenceTransition(
+      vehicleId,
+      reading.latitude,
+      reading.longitude
     );
 
-  if (distance <= DELIVERY_ZONE.radiusKm) {
-    console.log(`${vehicleId} is inside the delivery zone`);
-  } else {
-    console.log(`${vehicleId} is outside the delivery zone`);
-  }
+    if (geofence.transition === "ENTERED") {
+      console.log(`${vehicleId} ENTERED the delivery zone`);
+    } else if (geofence.transition === "EXITED") {
+      console.log(`${vehicleId} EXITED the delivery zone`);
+    }
 
     console.log("Telemetry received:", reading);
     const io = getIO();

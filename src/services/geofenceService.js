@@ -1,5 +1,11 @@
 const EARTH_RADIUS_KM = 6371;
 
+const DELIVERY_ZONE = {
+  latitude: 28.6139,
+  longitude: 77.2090,
+  radiusKm: 5,
+};
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const toRadians = (degrees) => (degrees * Math.PI) / 180;
 
@@ -17,10 +23,33 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return EARTH_RADIUS_KM * c;
 }
 
-const DELIVERY_ZONE = {
-  latitude: 28.6139,
-  longitude: 77.2090,
-  radiusKm: 5,
-};
 
-module.exports = { calculateDistance,DELIVERY_ZONE };
+const vehicleGeofenceStates = new Map();
+
+function detectGeofenceTransition(vehicleId, latitude, longitude) {
+  const distance = calculateDistance(
+    latitude,
+    longitude,
+    DELIVERY_ZONE.latitude,
+    DELIVERY_ZONE.longitude
+  );
+
+  const isInside = distance <= DELIVERY_ZONE.radiusKm;
+  const wasInside = vehicleGeofenceStates.get(vehicleId);
+
+  let transition = null;
+
+  if (wasInside !== undefined && wasInside !== isInside) {
+    transition = isInside ? "ENTERED" : "EXITED";
+  }
+
+  vehicleGeofenceStates.set(vehicleId, isInside);
+
+  return { distance, isInside, transition };
+}
+
+
+module.exports = { calculateDistance,
+    DELIVERY_ZONE,
+     detectGeofenceTransition
+};
