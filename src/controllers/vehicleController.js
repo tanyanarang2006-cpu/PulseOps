@@ -8,6 +8,7 @@ const {
 const {
   processVehicleAlerts,
 } = require("../services/eventDetectionService");
+const eventService = require("../services/eventService");
 
 async function receiveTelemetry(req, res) {
   try {
@@ -49,19 +50,31 @@ async function receiveTelemetry(req, res) {
 
     await processVehicleAlerts(reading, alerts);
 
-await processVehicleAlerts(reading, alerts);
-    //Geofence check
-    const geofence = detectGeofenceTransition(
-      vehicleId,
-      reading.latitude,
-      reading.longitude
-    );
+const geofence = detectGeofenceTransition(
+  vehicleId,
+  reading.latitude,
+  reading.longitude
+);
 
-    if (geofence.transition === "ENTERED") {
-      console.log(`${vehicleId} ENTERED the delivery zone`);
-    } else if (geofence.transition === "EXITED") {
-      console.log(`${vehicleId} EXITED the delivery zone`);
-    }
+if (geofence.transition) {
+  const eventType =
+    geofence.transition === "ENTERED"
+      ? "GEOFENCE_ENTERED"
+      : "GEOFENCE_EXITED";
+
+  await eventService.createEvent({
+    vehicleId,
+    type: eventType,
+    message:
+      geofence.transition === "ENTERED"
+        ? "Vehicle entered the delivery zone"
+        : "Vehicle exited the delivery zone",
+    latitude: reading.latitude,
+    longitude: reading.longitude,
+  });
+
+  console.log(`Geofence event recorded: ${vehicleId} - ${eventType}`);
+}
 
     console.log("Telemetry received:", reading);
     const io = getIO();

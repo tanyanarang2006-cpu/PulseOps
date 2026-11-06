@@ -11,6 +11,7 @@ import {
   Truck,
   Wifi,
 } from "lucide-react";
+import FleetMap from "./components/FleetMap";
 
 function getVehicleStatus(vehicle) {
   if (vehicle.battery <= 20 || vehicle.temperature >= 80) {
@@ -24,6 +25,7 @@ function App() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedVehicleId, setSelectedVehicleId] = useState(null);
 
   useEffect(() => {
     const socket = io("http://localhost:5000");
@@ -213,16 +215,10 @@ function App() {
               </span>
             </div>
 
-            <div className="map-placeholder">
-              <div className="map-placeholder-icon">
-                <MapPin size={28} />
-              </div>
-              <h3>Your fleet map goes here</h3>
-              <p>
-                We'll add the interactive Delhi map and vehicle
-                markers in the next step.
-              </p>
-            </div>
+            <FleetMap
+              vehicles={vehicles}
+              selectedVehicleId={selectedVehicleId}
+            />
 
             <div className="map-footer">
               <span>
@@ -249,8 +245,13 @@ function App() {
             <div className="vehicle-list">
               {vehicles.map((vehicle) => (
                 <div
-                  className="vehicle-row"
+                  className={`vehicle-row ${
+                    selectedVehicleId === vehicle.vehicleId ? "selected-row" : ""
+                  }`}
                   key={vehicle.vehicleId}
+                  onClick={() => setSelectedVehicleId(vehicle.vehicleId)}
+                  style={{ cursor: "pointer" }}
+                  title="Click to focus on map"
                 >
                   <div className="vehicle-icon">
                     <Truck size={20} />

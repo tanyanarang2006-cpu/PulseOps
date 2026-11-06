@@ -348,8 +348,19 @@ input {
   display: flex;
   align-items: flex-start;
   gap: 11px;
-  padding: 18px 0;
+  padding: 14px 10px;
   border-top: 1px solid #243047;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.vehicle-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.vehicle-row.selected-row {
+  background: rgba(124, 231, 194, 0.08);
+  border-left: 3px solid #7ce7c2;
 }
 
 .vehicle-icon {

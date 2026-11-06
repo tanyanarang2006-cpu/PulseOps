@@ -1,0 +1,194 @@
+/* Leaflet Map Container */
+.fleet-map-container {
+  width: 100%;
+  height: 420px;
+  background: #0f172a;
+  position: relative;
+  z-index: 1;
+}
+
+/* Custom Vehicle Marker Styling */
+.pulseops-marker-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.custom-vehicle-marker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.marker-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 14px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  transition: transform 0.2s ease, background 0.3s ease;
+  white-space: nowrap;
+}
+
+.custom-vehicle-marker:hover .marker-bubble {
+  transform: scale(1.08);
+}
+
+/* Normal vehicle marker */
+.custom-vehicle-marker.normal .marker-bubble {
+  background: #064e3b;
+  color: #6ee7b7;
+  border: 1.5px solid #10b981;
+}
+
+/* Attention / warning vehicle marker */
+.custom-vehicle-marker.attention .marker-bubble {
+  background: #451a03;
+  color: #fdba74;
+  border: 1.5px solid #f97316;
+}
+
+/* Pulse animation */
+.marker-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  pointer-events: none;
+  animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+.custom-vehicle-marker.normal .marker-pulse {
+  border: 2px solid rgba(16, 185, 129, 0.6);
+}
+
+.custom-vehicle-marker.attention .marker-pulse {
+  border: 2px solid rgba(249, 115, 22, 0.8);
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Popup styling customized for PulseOps Dark Theme */
+.leaflet-popup-content-wrapper {
+  background: #111a2b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #293852 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+  background: #111a2b !important;
+  border: 1px solid #293852 !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  top: 8px !important;
+  right: 8px !important;
+  padding: 0 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #ffffff !important;
+}
+
+/* Popup Inner Contents */
+.pulseops-popup {
+  font-family: "DM Sans", sans-serif;
+  min-width: 190px;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #243047;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.popup-vehicle-id {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.popup-time {
+  font-size: 10px;
+  color: #8491a8;
+}
+
+.popup-status-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.popup-status-badge.badge-active {
+  background: #17362f;
+  color: #75dfb6;
+}
+
+.popup-status-badge.badge-attention {
+  background: #3a2b27;
+  color: #ffbd80;
+}
+
+.popup-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.popup-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 9px;
+  color: #8491a8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.stat-value.stat-warn {
+  color: #ff9f50;
+}
+
+.stat-value-sm {
+  font-size: 11px;
+  color: #94a3b8;
+}

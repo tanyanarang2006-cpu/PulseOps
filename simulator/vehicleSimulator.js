@@ -26,8 +26,8 @@ const VEHICLES = [
   },
   {
     vehicleId: "DEL-105",
-    latitude: 28.5950,
-    longitude: 77.2200,
+    latitude: 28.68,
+    longitude: 77.2090,
     battery: 83,
   },
 ];
@@ -36,8 +36,19 @@ const API_URL = "http://localhost:5000";
 
 async function sendTelemetry(vehicle) {
   // Simulate a small movement
-  vehicle.latitude += (Math.random() - 0.5) * 0.001;
-  vehicle.longitude += (Math.random() - 0.5) * 0.001;
+  // vehicle.latitude += (Math.random() - 0.5) * 0.001;
+  // vehicle.longitude += (Math.random() - 0.5) * 0.001;
+
+  // Temporary geofence testing for DEL-105
+  if (vehicle.vehicleId === "DEL-105") {
+    // Move outside the 5 km zone
+    vehicle.latitude = 28.68;
+    vehicle.longitude = 77.2090;
+  } else {
+    // Normal movement for other vehicles
+    vehicle.latitude += (Math.random() - 0.5) * 0.001;
+    vehicle.longitude += (Math.random() - 0.5) * 0.001;
+  }
 
   // Simulate battery consumption
   vehicle.battery = Math.max(
