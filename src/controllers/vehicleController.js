@@ -143,8 +143,50 @@ async function getVehicleById(req, res) {
   }
 }
 
+async function getRecentAlerts(req, res) {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const events = await eventService.getAllEvents(limit);
+
+    return res.json({
+      success: true,
+      count: events.length,
+      data: events,
+    });
+  } catch (error) {
+    console.error("Error fetching recent alerts:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch recent alerts",
+    });
+  }
+}
+
+async function getVehicleEvents(req, res) {
+  try {
+    const { vehicleId } = req.params;
+    const events = await eventService.getEventsByVehicle(vehicleId);
+
+    return res.json({
+      success: true,
+      count: events.length,
+      data: events,
+    });
+  } catch (error) {
+    console.error("Error fetching vehicle events:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch vehicle events",
+    });
+  }
+}
+
 module.exports = {
   receiveTelemetry,
   getAllVehicles,
   getVehicleById,
+  getRecentAlerts,
+  getVehicleEvents,
 };
