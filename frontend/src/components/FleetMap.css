@@ -1,19 +1,29 @@
-/* Leaflet Map Container */
+/* Fleet Map Wrapper & Container - Fit to screen */
+.fleet-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
 .fleet-map-container {
   width: 100%;
-  height: 420px;
-  background: #0f172a;
+  height: 100%;
+  min-height: 100%;
+  background: #1c1c1e;
   position: relative;
   z-index: 1;
 }
 
-/* Custom Vehicle Marker Styling */
+/* Custom macOS Vehicle Marker Annotation */
 .pulseops-marker-wrapper {
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
 }
 
-.custom-vehicle-marker {
+.macos-vehicle-marker {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -21,174 +31,239 @@
   cursor: pointer;
 }
 
-.marker-bubble {
+.marker-capsule {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border-radius: 14px;
-  font-family: "DM Sans", sans-serif;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 16px;
+  background: rgba(28, 28, 30, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   font-size: 11px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-  transition: transform 0.2s ease, background 0.3s ease;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
   white-space: nowrap;
 }
 
-.custom-vehicle-marker:hover .marker-bubble {
+.macos-vehicle-marker:hover .marker-capsule {
   transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
 }
 
-/* Normal vehicle marker */
-.custom-vehicle-marker.normal .marker-bubble {
-  background: #064e3b;
-  color: #6ee7b7;
-  border: 1.5px solid #10b981;
+.status-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
-/* Attention / warning vehicle marker */
-.custom-vehicle-marker.attention .marker-bubble {
-  background: #451a03;
-  color: #fdba74;
-  border: 1.5px solid #f97316;
+.macos-vehicle-marker.normal .status-indicator-dot {
+  background: #30d158;
+  box-shadow: 0 0 8px rgba(48, 209, 88, 0.8);
 }
 
-/* Pulse animation */
-.marker-pulse {
+.macos-vehicle-marker.attention .status-indicator-dot {
+  background: #ff9f0a;
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.8);
+}
+
+/* Subtle Beacon Pulse Effect */
+.marker-beacon {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 14px;
+  border-radius: 16px;
   pointer-events: none;
-  animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  animation: macos-beacon 2.4s cubic-bezier(0.2, 0, 0.3, 1) infinite;
 }
 
-.custom-vehicle-marker.normal .marker-pulse {
-  border: 2px solid rgba(16, 185, 129, 0.6);
+.macos-vehicle-marker.normal .marker-beacon {
+  border: 1.5px solid rgba(48, 209, 88, 0.5);
 }
 
-.custom-vehicle-marker.attention .marker-pulse {
-  border: 2px solid rgba(249, 115, 22, 0.8);
+.macos-vehicle-marker.attention .marker-beacon {
+  border: 1.5px solid rgba(255, 159, 10, 0.65);
 }
 
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.9;
-  }
-  70% {
-    transform: scale(1.35);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
+@keyframes macos-beacon {
+  0% { transform: scale(0.95); opacity: 0.9; }
+  75% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
 }
 
-/* Popup styling customized for PulseOps Dark Theme */
+/* macOS Leaflet Popups */
 .leaflet-popup-content-wrapper {
-  background: #111a2b !important;
-  color: #e2e8f0 !important;
-  border: 1px solid #293852 !important;
-  border-radius: 10px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  background: rgba(28, 28, 30, 0.96) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
   padding: 0 !important;
 }
 
 .leaflet-popup-tip {
-  background: #111a2b !important;
-  border: 1px solid #293852 !important;
+  background: rgba(28, 28, 30, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 .leaflet-popup-content {
-  margin: 12px 14px !important;
+  margin: 14px 16px !important;
   line-height: 1.4 !important;
 }
 
 .leaflet-container a.leaflet-popup-close-button {
-  color: #94a3b8 !important;
-  top: 8px !important;
-  right: 8px !important;
-  padding: 0 !important;
+  color: #8e8e93 !important;
+  top: 9px !important;
+  right: 9px !important;
+  padding: 2px !important;
+  border-radius: 50% !important;
+  font-size: 16px !important;
+  display: grid;
+  place-items: center;
 }
 
 .leaflet-container a.leaflet-popup-close-button:hover {
   color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Popup Inner Contents */
-.pulseops-popup {
-  font-family: "DM Sans", sans-serif;
-  min-width: 190px;
+/* Inner macOS Popup Contents */
+.macos-popup {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  min-width: 200px;
 }
 
-.popup-header {
+.popup-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #243047;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 8px;
   margin-bottom: 10px;
 }
 
-.popup-vehicle-id {
+.popup-title-area {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.popup-id {
   font-size: 13px;
   font-weight: 700;
-  color: #f8fafc;
+  color: #ffffff;
 }
 
 .popup-time {
   font-size: 10px;
-  color: #8491a8;
+  color: #8e8e93;
 }
 
-.popup-status-badge {
-  font-size: 10px;
+.popup-badge {
+  font-size: 9px;
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 4px;
 }
 
-.popup-status-badge.badge-active {
-  background: #17362f;
-  color: #75dfb6;
+.popup-badge.badge-active {
+  background: rgba(48, 209, 88, 0.15);
+  color: #30d158;
 }
 
-.popup-status-badge.badge-attention {
-  background: #3a2b27;
-  color: #ffbd80;
+.popup-badge.badge-attention {
+  background: rgba(255, 159, 10, 0.15);
+  color: #ff9f0a;
 }
 
-.popup-stats-grid {
+.popup-metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px 12px;
 }
 
-.popup-stat-item {
+.popup-metric {
   display: flex;
   flex-direction: column;
 }
 
-.stat-label {
+.m-label {
   font-size: 9px;
-  color: #8491a8;
+  color: #8e8e93;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
-.stat-value {
+.m-val {
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: #ffffff;
+  margin-top: 1px;
 }
 
-.stat-value.stat-warn {
-  color: #ff9f50;
+.m-val.m-warn {
+  color: #ff9f0a;
 }
 
-.stat-value-sm {
-  font-size: 11px;
-  color: #94a3b8;
+.m-val.m-danger {
+  color: #ff453a;
+}
+
+.m-val-sm {
+  font-size: 10px;
+  color: #8e8e93;
+  margin-top: 1px;
+}
+
+.popup-warnings {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.warning-pill {
+  font-size: 10px;
+  font-weight: 600;
+  color: #ff9f0a;
+  background: rgba(255, 159, 10, 0.12);
+  padding: 3px 6px;
+  border-radius: 4px;
+  border-left: 2px solid #ff9f0a;
+}
+
+/* Custom Leaflet Zoom Controls (macOS style) */
+.leaflet-bar {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.leaflet-bar a {
+  background-color: rgba(28, 28, 30, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  transition: background 0.15s ease !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #3a3a3c !important;
+  color: #ffffff !important;
 }

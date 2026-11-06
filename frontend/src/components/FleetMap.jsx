@@ -14,62 +14,84 @@ function createVehicleIcon(vehicleId, isAttention) {
   return L.divIcon({
     className: "pulseops-marker-wrapper",
     html: `
-      <div class="custom-vehicle-marker ${isAttention ? "attention" : "normal"}">
-        <div class="marker-pulse"></div>
-        <div class="marker-bubble">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
-            <path d="M15 18H9"></path>
-            <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.49-4.36A1 1 0 0 0 17.51 8H14v10Z"></path>
-            <circle cx="17" cy="18" r="2"></circle>
-            <circle cx="7" cy="18" r="2"></circle>
-          </svg>
-          <span class="marker-id">${vehicleId}</span>
+      <div class="macos-vehicle-marker ${isAttention ? "attention" : "normal"}">
+        <div class="marker-beacon"></div>
+        <div class="marker-capsule">
+          <span class="status-indicator-dot"></span>
+          <span class="marker-title">${vehicleId}</span>
         </div>
       </div>
     `,
-    iconSize: [60, 34],
-    iconAnchor: [30, 17],
-    popupAnchor: [0, -18],
+    iconSize: [64, 30],
+    iconAnchor: [32, 15],
+    popupAnchor: [0, -16],
   });
 }
 
 function createPopupContent(vehicle, status) {
   const isAttention = status === "Attention";
   const updatedTime = vehicle.timestamp
-    ? new Date(vehicle.timestamp).toLocaleTimeString()
-    : new Date().toLocaleTimeString();
+    ? new Date(vehicle.timestamp).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+    : new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+  const activeAlerts = [];
+  if (vehicle.battery <= 20) {
+    activeAlerts.push(`Low Battery Alert (${vehicle.battery}%)`);
+  }
+  if (vehicle.temperature >= 80) {
+    activeAlerts.push(`High Temperature Warning (${vehicle.temperature}°C)`);
+  }
 
   return `
-    <div class="pulseops-popup">
-      <div class="popup-header">
-        <div class="popup-title">
-          <span class="popup-vehicle-id">${vehicle.vehicleId}</span>
-          <span class="popup-status-badge ${isAttention ? "badge-attention" : "badge-active"}">
+    <div class="macos-popup">
+      <div class="popup-top">
+        <div class="popup-title-area">
+          <span class="popup-id">${vehicle.vehicleId}</span>
+          <span class="popup-badge ${isAttention ? "badge-attention" : "badge-active"}">
             ${status}
           </span>
         </div>
         <span class="popup-time">${updatedTime}</span>
       </div>
 
-      <div class="popup-stats-grid">
-        <div class="popup-stat-item">
-          <span class="stat-label">Battery</span>
-          <span class="stat-value ${vehicle.battery <= 20 ? "stat-warn" : ""}">${vehicle.battery}%</span>
+      <div class="popup-metrics-grid">
+        <div class="popup-metric">
+          <span class="m-label">Battery</span>
+          <span class="m-val ${vehicle.battery <= 20 ? "m-warn" : ""}">${vehicle.battery}%</span>
         </div>
-        <div class="popup-stat-item">
-          <span class="stat-label">Temperature</span>
-          <span class="stat-value ${vehicle.temperature >= 80 ? "stat-warn" : ""}">${vehicle.temperature}°C</span>
+        <div class="popup-metric">
+          <span class="m-label">Engine Temp</span>
+          <span class="m-val ${vehicle.temperature >= 80 ? "m-danger" : ""}">${vehicle.temperature}°C</span>
         </div>
-        <div class="popup-stat-item">
-          <span class="stat-label">Speed</span>
-          <span class="stat-value">${vehicle.speed} km/h</span>
+        <div class="popup-metric">
+          <span class="m-label">Speed</span>
+          <span class="m-val">${vehicle.speed} km/h</span>
         </div>
-        <div class="popup-stat-item">
-          <span class="stat-label">Coordinates</span>
-          <span class="stat-value-sm">${vehicle.latitude.toFixed(4)}, ${vehicle.longitude.toFixed(4)}</span>
+        <div class="popup-metric">
+          <span class="m-label">Coordinates</span>
+          <span class="m-val-sm">${vehicle.latitude.toFixed(4)}, ${vehicle.longitude.toFixed(4)}</span>
         </div>
       </div>
+
+      ${
+        activeAlerts.length > 0
+          ? `
+        <div class="popup-warnings">
+          ${activeAlerts
+            .map((alertText) => `<div class="warning-pill">${alertText}</div>`)
+            .join("")}
+        </div>
+      `
+          : ""
+      }
     </div>
   `;
 }
@@ -79,18 +101,20 @@ export default function FleetMap({ vehicles = [], selectedVehicleId = null }) {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
 
-  // 1. Initialize map on mount
+  // 1. Initialize map on mount using 100% free OpenStreetMap (NO API KEY required)
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Default center on Delhi region matching the simulated coordinates
     const map = L.map(mapContainerRef.current, {
-      zoomControl: true,
+      zoomControl: false,
       attributionControl: true,
     }).setView([28.62, 77.215], 13);
 
-    // OpenStreetMap standard tile layer
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    // Zoom controls bottom-right
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    // Standard OpenStreetMap - completely free, no API key needed
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
@@ -98,7 +122,7 @@ export default function FleetMap({ vehicles = [], selectedVehicleId = null }) {
 
     mapInstanceRef.current = map;
 
-    // Resize handling to prevent grey tiles if container dimensions change
+    // ResizeObserver ensures map redraws without grey boxes when dimensions adjust
     const resizeObserver = new ResizeObserver(() => {
       map.invalidateSize();
     });
@@ -136,7 +160,6 @@ export default function FleetMap({ vehicles = [], selectedVehicleId = null }) {
       const existingMarker = markersRef.current[vehicle.vehicleId];
 
       if (existingMarker) {
-        // Smoothly update location and content without recreating marker
         existingMarker.setLatLng([vehicle.latitude, vehicle.longitude]);
         existingMarker.setIcon(icon);
 
@@ -145,7 +168,6 @@ export default function FleetMap({ vehicles = [], selectedVehicleId = null }) {
           popup.setContent(popupHtml);
         }
       } else {
-        // Create new marker
         const marker = L.marker([vehicle.latitude, vehicle.longitude], {
           icon,
         }).addTo(map);
@@ -153,13 +175,13 @@ export default function FleetMap({ vehicles = [], selectedVehicleId = null }) {
         marker.bindPopup(popupHtml, {
           closeButton: true,
           offset: [0, -10],
+          className: "macos-leaflet-popup",
         });
 
         markersRef.current[vehicle.vehicleId] = marker;
       }
     });
 
-    // Clean up markers for removed vehicles
     Object.keys(markersRef.current).forEach((vId) => {
       if (!currentVehicleIds.has(vId)) {
         markersRef.current[vId].remove();
@@ -179,5 +201,9 @@ export default function FleetMap({ vehicles = [], selectedVehicleId = null }) {
     }
   }, [selectedVehicleId]);
 
-  return <div className="fleet-map-container" ref={mapContainerRef} />;
+  return (
+    <div className="fleet-map-wrapper">
+      <div className="fleet-map-container" ref={mapContainerRef} />
+    </div>
+  );
 }
